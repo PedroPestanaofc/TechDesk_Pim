@@ -8,7 +8,6 @@ namespace TechDesk.Models
         public int IdChamado { get; set; }
         public string Titulo { get; set; } = string.Empty;
         public string Descricao { get; set; } = string.Empty;
-        public string Prioridade { get; set; } = string.Empty;
         public string Status { get; set; } = "Aberto";
         public DateTime DataInicio { get; set; }
         public DateTime? DataFinal { get; set; }

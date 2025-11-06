@@ -86,7 +86,6 @@ public partial class TechDeskDbContext : DbContext
 
             entity.HasIndex(e => new { e.DataInicio, e.DataFinal }, "IX_Chamados_Datas");
 
-            entity.HasIndex(e => e.Prioridade, "IX_Chamados_Prioridade");
 
             entity.HasIndex(e => e.Status, "IX_Chamados_Status");
 
@@ -100,7 +99,6 @@ public partial class TechDeskDbContext : DbContext
                 .HasPrecision(0)
                 .HasDefaultValueSql("(sysutcdatetime())");
             entity.Property(e => e.Nivel).HasMaxLength(10);
-            entity.Property(e => e.Prioridade).HasMaxLength(10);
             entity.Property(e => e.Status).HasMaxLength(20);
             entity.Property(e => e.Titulo).HasMaxLength(200);
 

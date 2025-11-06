@@ -4,7 +4,6 @@
     {
         public string Titulo { get; set; } = string.Empty;
         public string Descricao { get; set; } = string.Empty;
-        public string Prioridade { get; set; } = string.Empty;
         public int IdUsuario { get; set; }
         public int IdCategoria { get; set; }
         public int? IdTecnico { get; set; }

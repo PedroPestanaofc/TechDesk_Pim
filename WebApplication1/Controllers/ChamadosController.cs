@@ -29,7 +29,6 @@ namespace TechDesk.Controllers
                     c.IdChamado,
                     c.Titulo,
                     c.Descricao,
-                    c.Prioridade,
                     c.Status,
                     c.Nivel,
                     c.DataInicio,
@@ -57,7 +56,6 @@ namespace TechDesk.Controllers
                     c.IdChamado,
                     c.Titulo,
                     c.Descricao,
-                    c.Prioridade,
                     c.Status,
                     c.Nivel,
                     c.DataInicio,
@@ -95,7 +93,6 @@ namespace TechDesk.Controllers
             {
                 Titulo = dto.Titulo,
                 Descricao = dto.Descricao,
-                Prioridade = dto.Prioridade,
                 Status = "Aberto",
                 DataInicio = DateTime.UtcNow,
                 IdUsuario = dto.IdUsuario,
@@ -113,7 +110,6 @@ namespace TechDesk.Controllers
                 chamado.IdChamado,
                 chamado.Titulo,
                 chamado.Descricao,
-                chamado.Prioridade,
                 chamado.Status,
                 chamado.Nivel,
                 chamado.DataInicio,
@@ -137,7 +133,6 @@ namespace TechDesk.Controllers
             chamado.Titulo = dto.Titulo;
             chamado.Descricao = dto.Descricao;
             chamado.Status = dto.Status;
-            chamado.Prioridade = dto.Prioridade;
             chamado.IdUsuario = dto.IdUsuario;
             chamado.IdCategoria = dto.IdCategoria;
             chamado.IdTecnico = dto.IdTecnico;
@@ -155,7 +150,6 @@ namespace TechDesk.Controllers
                 chamado.IdChamado,
                 chamado.Titulo,
                 chamado.Descricao,
-                chamado.Prioridade,
                 chamado.Status,
                 chamado.Nivel,
                 chamado.DataInicio,
