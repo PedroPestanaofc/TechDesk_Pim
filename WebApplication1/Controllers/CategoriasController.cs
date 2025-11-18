@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using TechDesk.Data;
 using Microsoft.EntityFrameworkCore;
+using TechDesk.DTOs;
 
 namespace TechDesk.Controllers
 {

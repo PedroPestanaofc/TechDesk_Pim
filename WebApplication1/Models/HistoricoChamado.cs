@@ -31,7 +31,7 @@ namespace TechDesk.Models
 
         public virtual Usuario? AutorUsuario { get; set; }
 
-        // 🔧 Tornamos a navegação opcional para não quebrar o POST
+        // Tornamos a navegação opcional para não quebrar o POST
         public virtual Chamado? IdChamadoNavigation { get; set; } = null!;
     }
 }

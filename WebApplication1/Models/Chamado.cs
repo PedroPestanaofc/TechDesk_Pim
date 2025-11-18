@@ -16,14 +16,12 @@ namespace TechDesk.Models
         public int IdCategoria { get; set; }
         public int? IdTecnico { get; set; }
 
-        // 🔗 Relacionamentos (ligações com outras tabelas)
+        // Relacionamentos
         public virtual Categoria IdCategoriaNavigation { get; set; } = null!;
         public virtual Tecnico? IdTecnicoNavigation { get; set; }
         public virtual Usuario IdUsuarioNavigation { get; set; } = null!;
         public virtual ICollection<HistoricoChamado> HistoricoChamados { get; set; } = new List<HistoricoChamado>();
         public virtual ICollection<FeedbackAtendimento> FeedbackAtendimentos { get; set; } = new List<FeedbackAtendimento>();
-
-        // ✅ Adicionando esta linha para corrigir o erro CS1061:
         public virtual ICollection<SolucoesSugerida> SolucoesSugerida { get; set; } = new List<SolucoesSugerida>();
     }
 }

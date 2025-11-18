@@ -1,4 +1,4 @@
-﻿namespace TechDesk.Models.DTOs
+﻿namespace TechDesk.DTOs
 {
     public class CadastroUsuarioDTO
     {

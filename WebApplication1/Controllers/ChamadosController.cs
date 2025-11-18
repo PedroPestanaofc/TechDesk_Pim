@@ -1,7 +1,9 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using TechDesk.Data;
+using TechDesk.DTOs;
 using TechDesk.Models;
+using TechDesk.Services;
 
 namespace TechDesk.Controllers
 {
@@ -10,10 +12,12 @@ namespace TechDesk.Controllers
     public class ChamadosController : ControllerBase
     {
         private readonly TechDeskDbContext _context;
+        private readonly IaService _iaService;
 
-        public ChamadosController(TechDeskDbContext context)
+        public ChamadosController(TechDeskDbContext context, IaService iaService)
         {
             _context = context;
+            _iaService = iaService;
         }
 
         // 🔹 GET: api/Chamados
@@ -33,9 +37,9 @@ namespace TechDesk.Controllers
                     c.Nivel,
                     c.DataInicio,
                     c.DataFinal,
-                    UsuarioNome = c.IdUsuarioNavigation != null ? c.IdUsuarioNavigation.Nome : null,
-                    CategoriaNome = c.IdCategoriaNavigation != null ? c.IdCategoriaNavigation.Nome : null,
-                    TecnicoNome = c.IdTecnicoNavigation != null ? c.IdTecnicoNavigation.Nome : null
+                    UsuarioNome = c.IdUsuarioNavigation != null ? (string?)c.IdUsuarioNavigation.Nome : null,
+                    CategoriaNome = c.IdCategoriaNavigation != null ? (string?)c.IdCategoriaNavigation.Nome : null,
+                    TecnicoNome = c.IdTecnicoNavigation != null ? (string?)c.IdTecnicoNavigation.Nome : null
                 })
                 .ToListAsync();
 
@@ -60,9 +64,9 @@ namespace TechDesk.Controllers
                     c.Nivel,
                     c.DataInicio,
                     c.DataFinal,
-                    UsuarioNome = c.IdUsuarioNavigation != null ? c.IdUsuarioNavigation.Nome : null,
-                    CategoriaNome = c.IdCategoriaNavigation != null ? c.IdCategoriaNavigation.Nome : null,
-                    TecnicoNome = c.IdTecnicoNavigation != null ? c.IdTecnicoNavigation.Nome : null
+                    UsuarioNome = c.IdUsuarioNavigation != null ? (string?)c.IdUsuarioNavigation.Nome : null,
+                    CategoriaNome = c.IdCategoriaNavigation != null ? (string?)c.IdCategoriaNavigation.Nome : null,
+                    TecnicoNome = c.IdTecnicoNavigation != null ? (string?)c.IdTecnicoNavigation.Nome : null
                 })
                 .FirstOrDefaultAsync();
 
@@ -85,7 +89,10 @@ namespace TechDesk.Controllers
             var categoria = await _context.Categorias.FindAsync(dto.IdCategoria);
             if (categoria == null) return BadRequest("Categoria não encontrada.");
 
-            var tecnico = await _context.Tecnicos.FindAsync(dto.IdTecnico);
+            var tecnico = dto.IdTecnico.HasValue
+                ? await _context.Tecnicos.FindAsync(dto.IdTecnico)
+                : null;
+
             if (dto.IdTecnico.HasValue && tecnico == null)
                 return BadRequest("Técnico não encontrado.");
 
@@ -98,13 +105,23 @@ namespace TechDesk.Controllers
                 IdUsuario = dto.IdUsuario,
                 IdCategoria = dto.IdCategoria,
                 IdTecnico = dto.IdTecnico,
-                Nivel = dto.Nivel
+                Nivel = dto.Nivel ?? string.Empty
             };
 
             _context.Chamados.Add(chamado);
             await _context.SaveChangesAsync();
 
-            // Retorno formatado igual ao GET
+            // 🔹 Chama IA para gerar primeira mensagem
+            try
+            {
+                await _iaService.criarMensagemComIA(chamado.IdChamado, chamado.Descricao);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"[IA ERRO] Falha ao gerar mensagem com IA: {ex.Message}");
+                // Não lança a exceção, apenas registra — assim o chamado é criado normalmente
+            }
+
             var retorno = new
             {
                 chamado.IdChamado,
@@ -116,7 +133,7 @@ namespace TechDesk.Controllers
                 chamado.DataFinal,
                 UsuarioNome = usuario.Nome,
                 CategoriaNome = categoria.Nome,
-                TecnicoNome = tecnico?.Nome
+                TecnicoNome = tecnico != null ? tecnico.Nome : null
             };
 
             return CreatedAtAction(nameof(GetChamadoPorId), new { id = chamado.IdChamado }, retorno);
@@ -130,20 +147,19 @@ namespace TechDesk.Controllers
             if (chamado == null)
                 return NotFound("Chamado não encontrado.");
 
-            chamado.Titulo = dto.Titulo;
-            chamado.Descricao = dto.Descricao;
-            chamado.Status = dto.Status;
-            chamado.IdUsuario = dto.IdUsuario;
-            chamado.IdCategoria = dto.IdCategoria;
-            chamado.IdTecnico = dto.IdTecnico;
-            chamado.Nivel = dto.Nivel;
-            chamado.DataFinal = dto.DataFinal;
+            chamado.Titulo = dto.Titulo ?? chamado.Titulo;
+            chamado.Descricao = dto.Descricao ?? chamado.Descricao;
+            chamado.Status = dto.Status ?? chamado.Status;
+            chamado.Nivel = dto.Nivel ?? chamado.Nivel;
+            chamado.DataFinal = dto.DataFinal ?? chamado.DataFinal;
 
             await _context.SaveChangesAsync();
 
             var usuario = await _context.Usuarios.FindAsync(dto.IdUsuario);
             var categoria = await _context.Categorias.FindAsync(dto.IdCategoria);
-            var tecnico = await _context.Tecnicos.FindAsync(dto.IdTecnico);
+            var tecnico = dto.IdTecnico.HasValue
+                ? await _context.Tecnicos.FindAsync(dto.IdTecnico)
+                : null;
 
             var retorno = new
             {
@@ -154,9 +170,9 @@ namespace TechDesk.Controllers
                 chamado.Nivel,
                 chamado.DataInicio,
                 chamado.DataFinal,
-                UsuarioNome = usuario?.Nome,
-                CategoriaNome = categoria?.Nome,
-                TecnicoNome = tecnico?.Nome
+                UsuarioNome = usuario != null ? usuario.Nome : null,
+                CategoriaNome = categoria != null ? categoria.Nome : null,
+                TecnicoNome = tecnico != null ? tecnico.Nome : null
             };
 
             return Ok(retorno);

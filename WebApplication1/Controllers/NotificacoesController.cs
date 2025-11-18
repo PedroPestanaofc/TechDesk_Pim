@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using TechDesk.Data;
+using TechDesk.DTOs;
 using TechDesk.Models;
 
 namespace TechDesk.Controllers
@@ -16,7 +17,7 @@ namespace TechDesk.Controllers
             _context = context;
         }
 
-        // ✅ GET /me/notificacoes-preferencias?usuarioId=1
+        // GET /me/notificacoes-preferencias?usuarioId=1
         [HttpGet("/me/notificacoes-preferencias")]
         public async Task<IActionResult> GetPreferencias([FromQuery] int usuarioId)
         {
@@ -30,7 +31,7 @@ namespace TechDesk.Controllers
             return Ok(prefs);
         }
 
-        // ✅ POST /me/notificacoes-preferencias
+        // POST /me/notificacoes-preferencias
         [HttpPost("/me/notificacoes-preferencias")]
         public async Task<IActionResult> CriarPreferencias([FromBody] PreferenciasNotificacaoDTO dto)
         {
@@ -60,7 +61,7 @@ namespace TechDesk.Controllers
             return CreatedAtAction(nameof(GetPreferencias), new { usuarioId = prefs.UsuarioId }, prefs);
         }
 
-        // ✅ PUT /me/notificacoes-preferencias?usuarioId=1
+        // PUT /me/notificacoes-preferencias?usuarioId=1
         [HttpPut("/me/notificacoes-preferencias")]
         public async Task<IActionResult> AtualizarPreferencias([FromQuery] int usuarioId, [FromBody] PreferenciasNotificacaoDTO dto)
         {

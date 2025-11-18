@@ -1,7 +1,9 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using TechDesk.Data;
+using TechDesk.DTOs;
 using TechDesk.Models;
+using TechDesk.Services;
 
 namespace TechDesk.Controllers
 {
@@ -10,124 +12,74 @@ namespace TechDesk.Controllers
     public class MensagemController : ControllerBase
     {
         private readonly TechDeskDbContext _context;
+        private readonly MensagemService _mensagemService;
 
-        public MensagemController(TechDeskDbContext context)
+        public MensagemController(TechDeskDbContext context, MensagemService mensagem)
         {
             _context = context;
+            _mensagemService = mensagem;
         }
 
-        // ✅ POST /api/Mensagem/{chamadoId}
+        //POST /api/Mensagem/{chamadoId}
         [HttpPost("{chamadoId:int}")]
-        public async Task<IActionResult> EnviarMensagem(int chamadoId, [FromBody] CreateMensagemDTO dto)
+        public async Task<IActionResult> EnviarMensagem(int chamadoId, [FromBody] MensagemCreateDTO dto)
         {
-            if (dto == null || string.IsNullOrWhiteSpace(dto.Mensagem))
+            if (dto == null || string.IsNullOrWhiteSpace(dto.Descricao))
                 return BadRequest("A mensagem não pode estar vazia.");
 
             var chamadoExiste = await _context.Chamados.AnyAsync(c => c.IdChamado == chamadoId);
             if (!chamadoExiste)
                 return NotFound($"Chamado com ID {chamadoId} não encontrado.");
 
-            // 🔒 Garante valores válidos conforme o banco
-            string[] statusValidos = { "Aberto", "EmAndamento", "AguardandoCliente", "Fechado" };
-
-            var novaMensagem = new HistoricoChamado
+            try 
             {
-                IdChamado = chamadoId,
-                AutorTipo = dto.AutorTipo switch
-                {
-                    "Usuario" or "Tecnico" or "Sistema" => dto.AutorTipo,
-                    _ => "Usuario"
-                },
-                AutorUsuarioId = dto.AutorUsuarioId,
-                AutorTecnicoId = dto.AutorTecnicoId,
-                Mensagem = dto.Mensagem,
-                Visibilidade = dto.Visibilidade == "Interno" || dto.Visibilidade == "Externo"
-                    ? dto.Visibilidade
-                    : "Externo",
-                StatusAntes = statusValidos.Contains(dto.StatusAntes) ? dto.StatusAntes : "Aberto",
-                StatusDepois = statusValidos.Contains(dto.StatusDepois) ? dto.StatusDepois : "EmAndamento",
-                Data = DateTime.UtcNow
-            };
-
-            _context.HistoricoChamados.Add(novaMensagem);
-            await _context.SaveChangesAsync();
-
-            // ✅ Se tiver anexo, cria o registro em AnexosMensagem
-            if (!string.IsNullOrEmpty(dto.NomeArquivo))
+                var novaMensagem = await _mensagemService.CreateAsync(dto);
+                return CreatedAtAction(nameof(ListarMensagensPorChamado),
+                    new { chamadoId = novaMensagem.IdChamado },
+                    novaMensagem);
+            }
+            catch (Exception ex)
             {
-                var anexo = new AnexosMensagem
-                {
-                    IdMensagem = novaMensagem.Id,
-                    NomeArquivo = dto.NomeArquivo,
-                    Url = dto.Url ?? string.Empty,
-                    Descricao = dto.DescricaoAnexo ?? string.Empty,
-                    ContentType = dto.ContentType ?? "application/octet-stream",
-                    TamanhoBytes = dto.TamanhoBytes > 0 ? dto.TamanhoBytes : 0,
-                    DataUpload = DateTime.UtcNow
-                };
-
-                _context.AnexosMensagems.Add(anexo);
-                await _context.SaveChangesAsync();
+                return StatusCode(500, $"Erro ao criar mensagem: {ex.Message}");
             }
 
-            return CreatedAtAction(nameof(ListarMensagensPorChamado),
-                new { chamadoId = novaMensagem.IdChamado },
-                novaMensagem);
         }
 
-        // ✅ PUT /api/Mensagem/{mensagemId}
+        // PUT /api/Mensagem/{mensagemId}
         [HttpPut("{mensagemId:int}")]
-        public async Task<IActionResult> EditarMensagem(int mensagemId, [FromBody] CreateMensagemDTO dto)
+        public async Task<IActionResult> EditarMensagem(int mensagemId, [FromBody] MensagemUpdateDTO dto)
         {
-            var mensagem = await _context.HistoricoChamados.FindAsync(mensagemId);
-            if (mensagem == null)
-                return NotFound("Mensagem não encontrada.");
-
-            if (!string.IsNullOrWhiteSpace(dto.Mensagem))
-                mensagem.Mensagem = dto.Mensagem;
-
-            await _context.SaveChangesAsync();
-            return Ok(mensagem);
+            
+            if (dto == null || string.IsNullOrWhiteSpace(dto.Descricao))
+                return BadRequest("A descrição da mensagem não pode estar vazia.");
+            try 
+            {
+                var mensagemAtualizada = await _mensagemService.UpdateAsync(mensagemId, dto);
+                return Ok(mensagemAtualizada);
+            }
+            catch (KeyNotFoundException knfEx)
+            {
+                return NotFound(knfEx.Message);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Erro ao atualizar mensagem: {ex.Message}");
+            }
         }
 
         // ✅ GET /api/Mensagem/chamado/{chamadoId}
         [HttpGet("chamado/{chamadoId:int}")]
         public async Task<IActionResult> ListarMensagensPorChamado(int chamadoId)
         {
-            var mensagensChamado = await _context.HistoricoChamados
-                .Where(h => h.IdChamado == chamadoId)
-                .Include(h => h.AutorUsuario)
-                .Include(h => h.AutorTecnico)
-                .Include(h => h.AnexosMensagems)
-                .OrderBy(h => h.Data)
-                .Select(h => new
-                {
-                    h.Id,
-                    h.IdChamado,
-                    h.Data,
-                    h.Mensagem,
-                    h.Visibilidade,
-                    h.StatusAntes,
-                    h.StatusDepois,
-                    h.AutorTipo,
-                    NomeAutor = h.AutorTipo == "Tecnico"
-                        ? h.AutorTecnico != null ? h.AutorTecnico.Nome : null
-                        : h.AutorUsuario != null ? h.AutorUsuario.Nome : null,
-                    Anexos = h.AnexosMensagems.Select(a => new
-                    {
-                        a.Id,
-                        a.NomeArquivo,
-                        a.Url,
-                        a.Descricao,
-                        a.DataUpload
-                    })
-                })
-                .ToListAsync();
-
-            if (!mensagensChamado.Any())
-                return NotFound("Nenhuma mensagem encontrada para este chamado.");
-
-            return Ok(mensagensChamado);
+            try 
+            {
+                var mensagens = await _mensagemService.GetAllAsync(chamadoId);
+                return Ok(mensagens);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Erro ao listar mensagens: {ex.Message}");
+            }
         }
     }
 }

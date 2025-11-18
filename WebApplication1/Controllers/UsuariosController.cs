@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using TechDesk.Data;
+using TechDesk.DTOs;
 using TechDesk.Models;
 
 namespace TechDesk.Controllers

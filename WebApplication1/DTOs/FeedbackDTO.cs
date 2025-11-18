@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace TechDesk.Models
+namespace TechDesk.DTOs
 {
     public class FeedbackDTO
     {

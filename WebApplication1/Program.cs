@@ -1,9 +1,9 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
 using TechDesk.Data;
+using TechDesk.Services;
 
 var builder = WebApplication.CreateBuilder(args);
-
 
 builder.Services.AddControllers()
     .AddJsonOptions(options =>
@@ -22,7 +22,6 @@ builder.Services.AddSwaggerGen(c =>
     });
 });
 
-// Configuração do DbContext com a connection string do appsettings.json
 builder.Services.AddDbContext<TechDeskDbContext>(options =>
     options.UseSqlServer(
         builder.Configuration.GetConnectionString("DefaultConnection"),
@@ -30,8 +29,19 @@ builder.Services.AddDbContext<TechDeskDbContext>(options =>
     )
 );
 
+builder.Services.AddScoped<TechDesk.Services.MensagemService>();
+builder.Services.AddScoped<TechDesk.Repositories.MensagemRepository>();
+builder.Services.AddHttpClient<IaService>();
+
+
 var app = builder.Build();
 
+app.UseCors(builder =>
+{
+    builder.AllowAnyOrigin()
+           .AllowAnyMethod()
+           .AllowAnyHeader();
+});
 
 if (app.Environment.IsDevelopment())
 {
@@ -39,10 +49,8 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
-
 app.UseHttpsRedirection();
 app.UseAuthorization();
-
 
 app.MapControllers();
 

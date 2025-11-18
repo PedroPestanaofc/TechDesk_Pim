@@ -24,7 +24,7 @@ namespace TechDesk.Models
 
         public DateTime Data { get; set; }
 
-        // 🔹 Nomes de navegação exatamente como o banco e o DbContext esperam:
+        //Nomes de navegação exatamente como o banco e o DbContext esperam:
         public Chamado? IdChamadoNavigation { get; set; }
 
         public Usuario? Usuario { get; set; }

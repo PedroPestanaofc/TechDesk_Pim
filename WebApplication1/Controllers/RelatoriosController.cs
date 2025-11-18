@@ -16,7 +16,7 @@ namespace TechDesk.Controllers
             _context = context;
         }
 
-        // ==================== RELATÓRIO GERAL ====================
+      
         [HttpGet("visao-geral")]
         public async Task<IActionResult> VisaoGeral([FromQuery] DateTime? inicio, [FromQuery] DateTime? fim)
         {
@@ -74,7 +74,7 @@ namespace TechDesk.Controllers
             return Ok(resultado);
         }
 
-        // ==================== SATISFAÇÃO DOS CLIENTES ====================
+        
         [HttpGet("satisfacao-clientes")]
         public async Task<IActionResult> SatisfacaoClientes([FromQuery] DateTime? inicio, [FromQuery] DateTime? fim)
         {

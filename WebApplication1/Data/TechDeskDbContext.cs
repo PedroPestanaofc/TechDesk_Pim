@@ -40,6 +40,8 @@ public partial class TechDeskDbContext : DbContext
 
     public virtual DbSet<VwTma> VwTmas { get; set; }
 
+    public virtual DbSet<Mensagens> Mensagens { get; set; }
+
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         => base.OnConfiguring(optionsBuilder);
 

@@ -1,4 +1,4 @@
-﻿namespace TechDesk.Models
+﻿namespace TechDesk.DTOs
 {
     public class CreateMensagemDTO
     {

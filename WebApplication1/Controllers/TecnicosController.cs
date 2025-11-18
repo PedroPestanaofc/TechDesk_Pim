@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using TechDesk.Data;
+using TechDesk.DTOs;
 using TechDesk.Models;
 
 namespace TechDesk.Controllers
@@ -16,7 +17,7 @@ namespace TechDesk.Controllers
             _context = context;
         }
 
-        // ✅ GET /api/Tecnicos
+        // GET /api/Tecnicos
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Tecnico>>> GetAll()
         {
@@ -24,7 +25,7 @@ namespace TechDesk.Controllers
             return Ok(tecnicos);
         }
 
-        // ✅ GET /api/Tecnicos/{id}
+        // GET /api/Tecnicos/{id}
         [HttpGet("{id:int}")]
         public async Task<ActionResult<Tecnico>> GetById(int id)
         {
@@ -73,7 +74,7 @@ namespace TechDesk.Controllers
         }
 
 
-        // ✅ PUT /api/Tecnicos/{id}
+        // PUT /api/Tecnicos/{id}
         [HttpPut("{id:int}")]
         public async Task<ActionResult<Tecnico>> Update(int id, [FromBody] Tecnico tecnicoAtualizado)
         {
@@ -92,7 +93,7 @@ namespace TechDesk.Controllers
             return Ok(tecnico);
         }
 
-        // ✅ DELETE /api/Tecnicos/{id}
+        // DELETE /api/Tecnicos/{id}
         [HttpDelete("{id:int}")]
         public async Task<ActionResult> Delete(int id)
         {

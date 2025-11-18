@@ -14,7 +14,7 @@ namespace TechDesk.Models
         public DateTime CriadoEm { get; set; } = DateTime.UtcNow;
         public DateTime? AtualizadoEm { get; set; }
 
-        // 🔗 Relacionamentos (necessários pro DbContext)
+        // Relacionamentos (necessários pro DbContext)
         public ICollection<Chamado>? Chamados { get; set; }
         public ICollection<FeedbackAtendimento>? FeedbackAtendimentos { get; set; }
         public ICollection<HistoricoChamado>? HistoricoChamados { get; set; }

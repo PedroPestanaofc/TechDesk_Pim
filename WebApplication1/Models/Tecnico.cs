@@ -19,7 +19,7 @@ namespace TechDesk.Models
         public DateTime CriadoEm { get; set; } = DateTime.UtcNow;
         public DateTime? AtualizadoEm { get; set; }
 
-        // 🔗 Relacionamentos (mantidos como no banco)
+        //Relacionamentos (mantidos como no banco)
         public virtual ICollection<Chamado> Chamados { get; set; } = new List<Chamado>();
         public virtual ICollection<HistoricoChamado> HistoricoChamados { get; set; } = new List<HistoricoChamado>();
         public virtual ICollection<Categoria> Categoria { get; set; } = new List<Categoria>();
